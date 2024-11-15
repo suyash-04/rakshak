@@ -42,6 +42,21 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
         onCoordinateChange(coord);
     }, [coord, onCoordinateChange]);
 
+    //to extract data for heatmap
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/hazards')
+                const data = await response.json()
+                console.log(data)
+            } catch (error) {
+                console.error('Error fetching data:', error)
+            }
+        }
+
+        fetchData()
+    }, [])
+
 
     const getMyLocation = (): void => {
         setSearchQuery('')
@@ -97,6 +112,9 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
 
         return null;
     }
+
+
+
     return (
         <Card className="w-full md:w-3/4 lg:w-2/3 h-[calc(85vh-4rem)] m-2 p-4 flex flex-col">
             <CardContent className="p-4 flex-grow flex flex-col">
