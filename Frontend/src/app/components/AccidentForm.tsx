@@ -24,9 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { useState } from "react"
 
 const formSchema = z.object({
-    accidentType: z.enum(["vehicle", "damagedroad", "landslide", "flood", "other"]),
-    description: z.string().min(10, "Description must be at least 10 characters."),
-    date: z.date()
+    type: z.enum(["vehicle", "damagedroad", "landslide", "flood", "other"]),
 })
 
 interface AccidentReportFormProps {
@@ -39,9 +37,8 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            description: "",
-            date: new Date(),
-            accidentType: "vehicle"
+
+            type: "vehicle",
         },
     })
 
@@ -54,8 +51,8 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                 },
                 body: JSON.stringify({
                     ...values,
-                    coordinates,
-                    timestamp: new Date().toISOString()
+                    latitude: coordinates[0],
+                    longitude: coordinates[1],
                 }),
             })
 
@@ -81,7 +78,7 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                     <CardContent className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="accidentType"
+                            name="type"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Type of Accident</FormLabel>
@@ -92,31 +89,13 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="vehicle">Vehicle Accident</SelectItem>
+                                            <SelectItem value="accident">Vehicle Accident</SelectItem>
                                             <SelectItem value="damagedroad">Damaged Road / Potholes</SelectItem>
                                             <SelectItem value="landslide">Landslide</SelectItem>
                                             <SelectItem value="flood">Flood</SelectItem>
                                             <SelectItem value="other">Other</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description of Accident</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Please provide a detailed description of what happened."
-                                            className="resize-none"
-                                            {...field}
-                                        />
-                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
