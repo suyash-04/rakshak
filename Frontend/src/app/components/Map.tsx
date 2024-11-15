@@ -125,7 +125,7 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
 
 
     return (
-        <Card className="w-full md:w-3/4 lg:w-2/3 h-[calc(85vh-4rem)] m-2 p-4 flex flex-col">
+        <Card className="w-full m-2 p-4 flex flex-col">
             <CardContent className="p-4 flex-grow flex flex-col">
                 <form onSubmit={handleSearch} className="flex space-x-2 mb-4">
                     <Input
@@ -138,7 +138,7 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                     <Button type="submit">Search</Button>
                     <Button onClick={getMyLocation}>My Location</Button>
                 </form>
-                <div className="flex-grow relative" style={{ minHeight: '300px', maxHeight: '60vh' }}>
+                <div className="flex-grow relative" style={{ minHeight: '300px' }}>
                     <MapContainer
                         style={{ height: '100%', width: '100%', aspectRatio: '16 / 9' }}
                         center={coord}
