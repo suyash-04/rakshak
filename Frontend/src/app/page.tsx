@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -15,6 +15,8 @@ const DynamicMap = dynamic(() => import('@/app/components/Map'), {
 export default function Home() {
   const [showForm, setShowForm] = useState(false)
   const [coordinates, setCoordinates] = useState<[number, number]>([27.7172, 85.324])
+
+
 
 
   return (
