@@ -47,7 +47,7 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            const response = await fetch('/api/accidents', {
+            const response = await fetch('/api/report-accidents', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
