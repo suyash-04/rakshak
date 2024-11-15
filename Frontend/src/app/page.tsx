@@ -48,12 +48,12 @@ export default function Home() {
         </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="md:col-span-3">
+          <Card className="md:col-span-4">
             <CardContent className="p-4">
               <DynamicMap onCoordinateChange={setCoordinates} />
             </CardContent>
           </Card>
-          <Card>
+          {/* <Card>
             <CardContent className="p-4">
               <h3 className="font-semibold mb-2">Map Legend</h3>
               <ul className="space-y-2">
@@ -71,7 +71,7 @@ export default function Home() {
                 </li>
               </ul>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </main>
 
