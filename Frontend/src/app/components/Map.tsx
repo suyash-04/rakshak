@@ -1,6 +1,6 @@
 'use client'
 
-import { scaleToRangeForAccident } from '../utils/normalizeFrequency'
+import { scaleToRangeForAccident,scaleToRangeForLandslide } from '../utils/normalizeFrequency'
 import { FC, useEffect, useState } from 'react'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Circle } from 'react-leaflet'
@@ -83,7 +83,9 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
 
     const GetHeatmap: FC = () => {
         const map = useMap();
-        const [addressPoints, setAddressPoints] = useState<HeatLatLngTuple[]>([]);
+        const [accidentaddressPoints, setaccidentAddressPoints] = useState<HeatLatLngTuple[]>([]);
+        const [landslideaddressPoints, setlandslideAddressPoints] = useState<HeatLatLngTuple[]>([]);
+        const [floodaddressPoints, setfloodAddressPoints] = useState<HeatLatLngTuple[]>([]);
 
         useEffect(() => {
             const fetchData = async () => {
@@ -91,13 +93,33 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                     const response = await fetch('http://127.0.0.1:8000/api/hazards');
                     const data = await response.json();
                     console.log(data);
-                    const transformedData: HeatLatLngTuple[] = data.map((item: any) => [
+                    const accidenttransformedData = data
+                    .filter((item: any) => item.type === "accident") // Filter by type
+                    .map((item : any) => [
                         item.latitude,
                         item.longitude,
                         scaleToRangeForAccident(item.frequency),
                     ]);
-                    console.log(transformedData)
-                    setAddressPoints(transformedData);
+                    const landslidetransformedData = data
+                    .filter((item: any) => item.type === "landslide") // Filter by type
+                    .map((item : any) => [
+                        item.latitude,
+                        item.longitude,
+                       100,
+                    ]);
+                   
+                    const floodtransformedData = data
+                    .filter((item: any) => item.type === "flood") // Filter by type
+                    .map((item : any) => [
+                        item.latitude,
+                        item.longitude,
+                        90,
+                    ]);
+                    
+                    console.log(accidenttransformedData)
+                    setaccidentAddressPoints(accidenttransformedData);
+                    setfloodAddressPoints(floodtransformedData);
+                    setlandslideAddressPoints(landslidetransformedData)
                 } catch (error) {
                     console.error('Error fetching data:', error);
                 }
@@ -108,16 +130,38 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
 
         useEffect(() => {
             // Assuming addressPoints is defined elsewhere in your code
-            console.log(addressPoints)
-            const heatLayer = L.heatLayer(addressPoints, {
+           
+            const accidentheatLayer = L.heatLayer(accidentaddressPoints, {
                 radius: 10,
                 blur: 5,
-                maxZoom: 17,
-            });
+                maxZoom: 17, gradient: {
+                    '0': 'Red',
+                    '1': 'Red'
+                  },
+            })
+            const landslideheatLayer = L.heatLayer(landslideaddressPoints, {
+                radius: 10,
+                blur: 5,
+                maxZoom: 17, gradient: {
+                    '0': 'Yellow',
+                    '1': 'Yellow'
+                  },
+            })
+            const floodheatLayer = L.heatLayer(floodaddressPoints, {
+                radius: 10,
+                blur: 5,
+                maxZoom: 17, gradient: {
+                    '0': 'Navy',
+                    '1': 'Navy'
+                  },
+            })
+            ;
             return () => {
-                heatLayer.addTo(map);
+                accidentheatLayer.addTo(map);
+                floodheatLayer.addTo(map);
+                landslideheatLayer.addTo(map);
             };
-        }, [map, addressPoints]);
+        }, [map, accidentaddressPoints, floodaddressPoints , landslideaddressPoints]);
 
         return null;
     }
