@@ -1,28 +1,11 @@
 import requests
 import time
 import logging
+import json
 
 logging.basicConfig(level=logging.INFO)
 
-accidents_data = {
-    "Satdobato": 31,
-    "Maitighar": 26,
-    "Thankot": 24,
-    "Kalanki": 22,
-    "Babarmahal": 20,
-    "Maharajgunj": 19,
-    "Min Bhawan": 18,
-    "Bhaktapur": 17,
-    "Sitapaila": 16,
-    "Jawalakhel": 15,
-    "Gatthhaghar": 15,
-    "Gangabu": 14,
-    "Chabahil/Bouddha": 14,
-    "Airport Road": 13,
-    "Sukedhara": 13,
-}
-
-api_url = "http://127.0.0.1:8000/api/report-accident/"
+api_url = "http://127.0.0.1:8000/api/report-hazard/"
 
 def get_lat_long(address):
     base_url = "https://nominatim.openstreetmap.org/search"
@@ -40,26 +23,30 @@ def get_lat_long(address):
         logging.error(f"HTTP Error: {response.status_code}")
     return None, None
 
-def record_accident(street, lat, lon):
+def record_accident(street, lat, lon, accident_type):
     if lat is None or lon is None:
-        logging.error(f"Invalid coordinates for {street}")
+        logging.error(f"{street} not found")
         return
 
     payload = {
-        "type": "accident",
+        "type": accident_type,
         "latitude": lat,
         "longitude": lon,
     }
     response = requests.post(api_url, json=payload)
     print(payload)
     if response.status_code == 200:
-        logging.info(f"Reported accident at {street}")
+        logging.info(f"Reported {accident_type} at {street}")
     else:
-        logging.error(f"Failed to record accident at {street}: {response.status_code}")
+        logging.error(f"Failed to record {accident_type} at {street}: {response.status_code}")
 
-for street, accidents in accidents_data.items():
-    lat, lon = get_lat_long(street)
-    if lat and lon:
-        for _ in range(accidents):
-            record_accident(street, lat, lon)
-            time.sleep(2)
+with open('backend/webscrap/data.json', 'r') as file:
+    accidents_data = json.load(file)
+
+for accident in accidents_data:
+    accident_type = accident.get("type")
+    street = accident.get("place")
+    if accident_type and street:
+        lat, lon = get_lat_long(street)
+        if lat and lon:
+            record_accident(street, lat, lon, accident_type)
