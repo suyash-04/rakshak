@@ -24,7 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { useState } from "react"
 
 const formSchema = z.object({
-    type: z.enum(["vehicle", "damagedroad", "landslide", "flood", "other"]),
+    type: z.enum(["accident", "damagedroad", "landslide", "flood", "other"]),
 })
 
 interface AccidentReportFormProps {
@@ -38,13 +38,13 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
         resolver: zodResolver(formSchema),
         defaultValues: {
 
-            type: "vehicle",
+            type: "accident",
         },
     })
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            const response = await fetch('/api/report-accidents', {
+            const response = await fetch('http://127.0. 0.1:8000/api/report-hazard', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
