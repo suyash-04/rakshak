@@ -3,7 +3,7 @@
 import { scaleToRangeForAccident } from '../utils/normalizeFrequency'
 import { FC, useEffect, useState } from 'react'
 import L from 'leaflet'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Circle } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import React from 'react'
 import { Input } from "@/components/ui/input"
@@ -43,7 +43,16 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
         onCoordinateChange(coord);
     }, [coord, onCoordinateChange]);
 
-    //to extract data for heatmap
+    const MapEventHandlers = () => {
+        useMapEvents({
+            click: (e) => {
+                const { lat, lng } = e.latlng;
+                setCoord([lat, lng]);
+            }
+        });
+        return null;
+    };
+
 
 
 
@@ -136,6 +145,7 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                         zoom={13}
                         scrollWheelZoom={true}
                     >
+                        <MapEventHandlers />
                         <MapUpdater center={coord} />
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -144,6 +154,11 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                         <Marker position={coord} icon={icon}>
                             <Popup>Your location</Popup>
                         </Marker>
+                        <Circle
+                            center={coord}
+                            radius={1500} // 1.5 km radius
+                            pathOptions={{ color: 'blue', fillColor: 'blue', fillOpacity: 0.2 }}
+                        />
                         <GetHeatmap />
                     </MapContainer>
                 </div>
