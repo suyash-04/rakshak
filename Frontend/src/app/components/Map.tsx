@@ -1,5 +1,6 @@
 'use client'
 
+import { scaleToRangeForAccident } from '../utils/normalizeFrequency'
 import { FC, useEffect, useState } from 'react'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
@@ -42,6 +43,9 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
         onCoordinateChange(coord);
     }, [coord, onCoordinateChange]);
 
+    //to extract data for heatmap
+
+
 
     const getMyLocation = (): void => {
         setSearchQuery('')
@@ -70,33 +74,47 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
 
     const GetHeatmap: FC = () => {
         const map = useMap();
+        const [addressPoints, setAddressPoints] = useState<HeatLatLngTuple[]>([]);
+
+        useEffect(() => {
+            const fetchData = async () => {
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/api/hazards');
+                    const data = await response.json();
+                    console.log(data);
+                    const transformedData: HeatLatLngTuple[] = data.map((item: any) => [
+                        item.latitude,
+                        item.longitude,
+                        scaleToRangeForAccident(item.frequency),
+                    ]);
+                    console.log(transformedData)
+                    setAddressPoints(transformedData);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            };
+
+            fetchData();
+        }, []);
 
         useEffect(() => {
             // Assuming addressPoints is defined elsewhere in your code
-            const addressPoints: HeatLatLngTuple[] = [
-                [27.7172, 85.3240, 20],
-                [27.7129, 85.3188, 60],
-                [27.7101, 85.3260, 60],
-                [27.7000, 85.3333, 20],
-
-            ];
-
-
+            console.log(addressPoints)
             const heatLayer = L.heatLayer(addressPoints, {
                 radius: 10,
                 blur: 5,
                 maxZoom: 17,
             });
-
-
-
             return () => {
                 heatLayer.addTo(map);
             };
-        }, [map]);
+        }, [map, addressPoints]);
 
         return null;
     }
+
+
+
     return (
         <Card className="w-full md:w-3/4 lg:w-2/3 h-[calc(85vh-4rem)] m-2 p-4 flex flex-col">
             <CardContent className="p-4 flex-grow flex flex-col">
