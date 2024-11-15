@@ -5,10 +5,15 @@ from app.database.connection import hazard_collection
 from app.schemas.location_schema import HazardData
 from typing import List
 
-async def find_hazard(type: str, lat: float, lon: float):
-    return await hazard_collection.find_one({"type": str, "latitude": lat, "longitude": lon})
+import logging
 
-async def increment_hazard_count(type:str, lat: float, lon: float):
+logging.basicConfig(level=logging.INFO)
+
+async def find_hazard(type: str, lat: float, lon: float):
+    return await hazard_collection.find_one({"type": type, "latitude": lat, "longitude": lon})
+
+async def increment_hazard_count(type: str, lat: float, lon: float):
+    logging.info(f"Incrementing hazard count for type: {type}, lat: {lat}, lon: {lon}")
     hazard = await find_hazard(type, lat, lon)
     if hazard:
         new_count = hazard["frequency"] + 1
