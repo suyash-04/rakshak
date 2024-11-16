@@ -14,6 +14,7 @@
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
+        const confidenceThreshold = 0.8; // Adjust this value as needed
 
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
@@ -42,7 +43,7 @@
             })
                 .then(function (response) {
                     const predictions = response.data.predictions;
-                    const fireDetected = predictions.some(prediction => prediction.class === 'fire');
+                    const fireDetected = predictions.some(prediction => prediction.class === 'fire' && prediction.confidence >= confidenceThreshold);
                     if (fireDetected) {
                         console.log("Fire is detected");
                     }
