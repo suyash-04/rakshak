@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const TWILIO_ACCOUNT_SID = 'AC153359bcbd2bbac6edaa0a2bb9c053cb'; // Replace with your Account SID
-const TWILIO_AUTH_TOKEN = '346abbdf76b9605e3488448ce6d2cc23';   // Replace with your Auth Token
+const TWILIO_AUTH_TOKEN = 'fb599c87471985344a57ccb8ed1050c6';   // Replace with your Auth Token
 const TWILIO_PHONE_NUMBER = '+14042366382'; // Replace with your Twilio phone number
 
 /**
