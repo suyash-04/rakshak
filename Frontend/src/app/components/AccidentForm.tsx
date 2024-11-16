@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { useState } from "react"
+import { useToast } from "@/hooks/use-toast"
+import { getLocationFromCoordinates } from "../utils/getLocationFromCoordinates"
 
 const formSchema = z.object({
     type: z.enum(["accident", "damagedroad", "landslide", "flood", "other"]),
@@ -33,6 +35,7 @@ interface AccidentReportFormProps {
 
 const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordinates }) => {
     const [isSubmitted, setIsSubmitted] = useState(false)
+    const { toast } = useToast()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -40,6 +43,7 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
             type: "accident",
         },
     })
+
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
@@ -61,6 +65,7 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
             setIsSubmitted(true) // Set submission status
 
             const messageResponse = await sendMessage(coordinates[0], coordinates[1])
+
             console.log(messageResponse)
 
             setTimeout(onClose, 2000) // Close form after 2 seconds for feedback display
@@ -104,7 +109,26 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                         />
                     </CardContent>
                     <CardFooter>
-                        <Button type="submit" className="w-full">Submit Report</Button>
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            onClick={async () => {
+                                try {
+                                    const location = await getLocationFromCoordinates(coordinates[0], coordinates[1]);
+                                    toast({
+                                        title: "Accident Reported",
+                                        description: `Accident reported at ${location}`,
+                                    });
+                                } catch (error) {
+                                    toast({
+                                        title: "Error",
+                                        description: "Failed to report the accident. Please try again."
+                                    });
+                                }
+                            }}
+                        >
+                            Submit Report
+                        </Button>
                         {isSubmitted && <p className="text-green-500 mt-2 px-1">Report submitted successfully!</p>}
                     </CardFooter>
                 </form>

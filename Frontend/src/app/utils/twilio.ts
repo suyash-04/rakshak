@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-const TWILIO_ACCOUNT_SID = process.env.NEXT_PUBLIC_TWILIO_ACCOUNT_SID; // Replace with your Account SID
-const TWILIO_AUTH_TOKEN = process.env.NEXT_PUBLIC_TWILIO_AUTH_TOKEN;   // Replace with your Auth Token
-const TWILIO_PHONE_NUMBER = process.env.NEXT_PUBLIC_TWILIO_PHONE_NUMBER; // Replace with your Twilio phone number
+const TWILIO_ACCOUNT_SID = 'AC153359bcbd2bbac6edaa0a2bb9c053cb'; // Replace with your Account SID
+const TWILIO_AUTH_TOKEN = '346abbdf76b9605e3488448ce6d2cc23';   // Replace with your Auth Token
+const TWILIO_PHONE_NUMBER = '+14042366382'; // Replace with your Twilio phone number
 
 /**
  * Send an SMS message using Twilio API

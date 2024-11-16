@@ -53,25 +53,6 @@ export default function Home() {
               <DynamicMap onCoordinateChange={setCoordinates} />
             </CardContent>
           </Card>
-          {/* <Card>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-2">Map Legend</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 bg-red-500 rounded-full"></span>
-                  High-risk area
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 bg-yellow-500 rounded-full"></span>
-                  Moderate-risk area
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-4 w-4 bg-green-500 rounded-full"></span>
-                  Low-risk area
-                </li>
-              </ul>
-            </CardContent>
-          </Card> */}
         </div>
       </main>
 
