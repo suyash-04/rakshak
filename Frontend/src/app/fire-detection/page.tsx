@@ -23,7 +23,7 @@ export async function handler(req: NextApiRequest, res: NextApiResponse) {
       method: "POST",
       url: "https://detect.roboflow.com/fire-vc4nw/3",
       params: {
-        api_key: "t2Fw98AlpW5ldaQu55sj"
+        api_key: "D0PwkQDgic4M3VCrGM8W"
       },
       data: req.body.image,
       headers: {
