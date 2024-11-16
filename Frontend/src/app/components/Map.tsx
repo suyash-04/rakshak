@@ -1,6 +1,6 @@
 'use client'
 
-import { scaleToRangeForAccident } from '../utils/normalizeFrequency'
+import { scaleToRangeForAccident, scaleToRangeForLandslide } from '../utils/normalizeFrequency'
 import { FC, useEffect, useState } from 'react'
 import L from 'leaflet'
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Circle } from 'react-leaflet'
@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { AlertCircle, MapPin, Search } from 'lucide-react'
 import 'leaflet.heat'
 import { getLocationFromCoordinates } from '../utils/coordinatesToLocation'
+import pLimit from 'p-limit';
 
 const icon = new L.Icon({
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -41,7 +42,9 @@ interface MapProps {
 const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
     const [coord, setCoord] = useState<Coordinates>([27.7172, 85.3240])
     const [searchQuery, setSearchQuery] = useState<string>('')
-    const [addressPoints, setAddressPoints] = useState<HeatLatLngTuple[]>([])
+    const [accidentaddressPoints, setaccidentAddressPoints] = useState<HeatLatLngTuple[]>([])
+    const [landslideaddressPoints, setlandslideAddressPoints] = useState<HeatLatLngTuple[]>([])
+    const [floodaddressPoints, setfloodAddressPoints] = useState<HeatLatLngTuple[]>([])
     const [newsPoints, setNewsPoints] = useState<object[]>([])
 
     useEffect(() => {
@@ -82,50 +85,120 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
         }
     }
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://127.0.0.1:8000/api/hazards');
-                const data = await response.json();
-                console.log(data)
-                const transformedData: HeatLatLngTuple[] = data.map((item: any) => [
-                    item.latitude,
-                    item.longitude,
-                    scaleToRangeForAccident(item.frequency),
-                ]);
-                setAddressPoints(transformedData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        fetchData();
-    }, []);
 
-    useEffect(() => {
-        const pointsWithinCircle = addressPoints.filter(([lat, lng]) => {
-            const distance = L.latLng(lat, lng).distanceTo(L.latLng(coord[0], coord[1]));
-            return distance <= 1500; // 1.5 km radius
-        });
-        pointsWithinCircle.forEach(async point => {
-            const location = await getLocationFromCoordinates(point[0], point[1]);
-            setNewsPoints(prevNewsPoints => [...prevNewsPoints, location]);
-        });
-    }, [coord, addressPoints]);
 
     const GetHeatmap: FC = () => {
-        const map = useMap();
+        const map = useMap()
+        useEffect(() => {
+            const fetchData = async () => {
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/api/hazards');
+                    const data = await response.json();
+                    console.log(data)
+                    const accidenttransformedData = data
+                        .filter((item: any) => item.type === "accident") // Filter by type
+                        .map((item: any) => [
+                            item.latitude,
+                            item.longitude,
+                            scaleToRangeForAccident(item.frequency),
+                        ]);
+                    const landslidetransformedData = data
+                        .filter((item: any) => item.type === "landslide") // Filter by type
+                        .map((item: any) => [
+                            item.latitude,
+                            item.longitude,
+                            100,
+                        ]);
+
+                    const floodtransformedData = data
+                        .filter((item: any) => item.type === "flood") // Filter by type
+                        .map((item: any) => [
+                            item.latitude,
+                            item.longitude,
+                            90,
+                        ]);
+
+                    console.log(accidenttransformedData)
+                    setaccidentAddressPoints(accidenttransformedData);
+                    setfloodAddressPoints(floodtransformedData);
+                    setlandslideAddressPoints(landslidetransformedData)
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            };
+            fetchData();
+        }, []);
+
 
         useEffect(() => {
-            const heatLayer = L.heatLayer(addressPoints, {
+            const fetchLocations = async () => {
+                const accidentpointsWithinCircle = [...accidentaddressPoints, ...floodaddressPoints, ...landslideaddressPoints].filter(([lat, lng]) => {
+                    const distance = L.latLng(lat, lng).distanceTo(L.latLng(coord[0], coord[1]));
+                    return distance <= 10500; // 10.5 km radius
+                });
+
+                // Limit concurrent requests to avoid rate limiting
+                const limit = pLimit(5); // Adjust concurrency as needed
+                const locationPromises = accidentpointsWithinCircle.map(([lat, lng]) =>
+                    limit(async () => {
+                        try {
+                            const location = await getLocationFromCoordinates(lat, lng);
+                            if (location && !('error' in location)) {
+                                return location;
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching location for [${lat}, ${lng}]:`, error);
+                        }
+                        return null;
+                    })
+                );
+
+                const locations = await Promise.all(locationPromises);
+
+                // Filter out null values
+                const validLocations = locations.filter(location => location !== null);
+                setNewsPoints(validLocations);
+                console.log(validLocations);
+            };
+
+            fetchLocations();
+        }, [coord, accidentaddressPoints, floodaddressPoints, landslideaddressPoints]);
+
+        useEffect(() => {
+            // Assuming addressPoints is defined elsewhere in your code
+
+            const accidentheatLayer = L.heatLayer(accidentaddressPoints, {
                 radius: 10,
                 blur: 5,
-                maxZoom: 17,
-            });
-            heatLayer.addTo(map);
+                maxZoom: 17, gradient: {
+                    '0': 'Red',
+                    '1': 'Red'
+                },
+            })
+            const landslideheatLayer = L.heatLayer(landslideaddressPoints, {
+                radius: 10,
+                blur: 5,
+                maxZoom: 17, gradient: {
+                    '0': 'Yellow',
+                    '1': 'Yellow'
+                },
+            })
+            const floodheatLayer = L.heatLayer(floodaddressPoints, {
+                radius: 10,
+                blur: 5,
+                maxZoom: 17, gradient: {
+                    '0': 'Navy',
+                    '1': 'Navy'
+                },
+            })
+                ;
             return () => {
-                map.removeLayer(heatLayer);
+                accidentheatLayer.addTo(map);
+                floodheatLayer.addTo(map);
+                landslideheatLayer.addTo(map);
             };
-        }, [map, addressPoints]);
+        }, [map, accidentaddressPoints, floodaddressPoints, landslideaddressPoints]);
+
 
         return null;
     }
