@@ -23,30 +23,30 @@ def get_lat_long(address):
         logging.error(f"HTTP Error: {response.status_code}")
     return None, None
 
-def record_accident(street, lat, lon, accident_type):
+def record_accident(place, lat, lon, hazards_type):
     if lat is None or lon is None:
-        logging.error(f"{street} not found")
+        logging.error(f"{place} not found")
         return
 
     payload = {
-        "type": accident_type,
+        "type": hazards_type,
         "latitude": lat,
         "longitude": lon,
     }
     response = requests.post(api_url, json=payload)
     print(payload)
     if response.status_code == 200:
-        logging.info(f"Reported {accident_type} at {street}")
+        logging.info(f"Reported {hazards_type} at {place}")
     else:
-        logging.error(f"Failed to record {accident_type} at {street}: {response.status_code}")
+        logging.error(f"Failed to record {hazards_type} at {place}: {response.status_code}")
 
 with open('backend/webscrap/data.json', 'r') as file:
-    accidents_data = json.load(file)
+    hazards_data = json.load(file)
 
-for accident in accidents_data:
-    accident_type = accident.get("type")
-    street = accident.get("place")
-    if accident_type and street:
-        lat, lon = get_lat_long(street)
+for hazards in hazards_data:
+    hazards_type = hazards.get("type")
+    place = hazards.get("place")
+    if hazards_type and place:
+        lat, lon = get_lat_long(place)
         if lat and lon:
-            record_accident(street, lat, lon, accident_type)
+            record_accident(place, lat, lon, hazards_type)
