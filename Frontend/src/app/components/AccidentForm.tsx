@@ -1,7 +1,7 @@
 "use client"
 import { sendMessage } from "../utils/twilio"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,11 +26,15 @@ import { getLocationFromCoordinates } from "../utils/getLocationFromCoordinates"
 
 const formSchema = z.object({
     type: z.enum(["accident", "damagedroad", "landslide", "flood", "other"]),
+    photo: z
+        .instanceof(File)
+        .refine(file => file?.type.startsWith("image/"), "Only image files are allowed")
+        .refine(file => file?.size <= 5 * 1024 * 1024, "Max file size is 5MB"),
 })
 
 interface AccidentReportFormProps {
-    onClose: () => void;
-    coordinates: [number, number];
+    onClose: () => void
+    coordinates: [number, number]
 }
 
 const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordinates }) => {
@@ -41,36 +45,31 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
         resolver: zodResolver(formSchema),
         defaultValues: {
             type: "accident",
+            photo: undefined,
         },
     })
 
-
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/report-hazard', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...values,
-                    latitude: coordinates[0],
-                    longitude: coordinates[1],
-                }),
+            const formData = new FormData()
+            formData.append("type", values.type)
+            formData.append("latitude", String(coordinates[0]))
+            formData.append("longitude", String(coordinates[1]))
+
+            const response = await fetch("http://127.0.0.1:8000/api/report-hazard", {
+                method: "POST",
+                body: formData,
             })
 
-            if (!response.ok) {
-                throw new Error('Failed to submit report')
-            }
             setIsSubmitted(true) // Set submission status
 
             const messageResponse = await sendMessage(coordinates[0], coordinates[1])
 
             console.log(messageResponse)
 
-            setTimeout(onClose, 2000) // Close form after 2 seconds for feedback display
+            setTimeout(onClose, 500) // Close form after 2 seconds for feedback display
         } catch (error) {
-            console.error('Error submitting form:', error)
+            console.error("Error submitting form:", error)
         }
     }
 
@@ -107,6 +106,23 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                                 </FormItem>
                             )}
                         />
+                        <FormItem>
+                            <FormLabel>Upload Photo</FormLabel>
+                            <FormControl>
+                                <Controller
+                                    name="photo"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => field.onChange(e.target.files?.[0])}
+                                        />
+                                    )}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
                     </CardContent>
                     <CardFooter>
                         <Button
@@ -114,22 +130,24 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                             className="w-full"
                             onClick={async () => {
                                 try {
-                                    const location = await getLocationFromCoordinates(coordinates[0], coordinates[1]);
+                                    const location = await getLocationFromCoordinates(coordinates[0], coordinates[1])
                                     toast({
                                         title: "Accident Reported",
                                         description: `Accident reported at ${location}`,
-                                    });
+                                    })
                                 } catch (error) {
                                     toast({
                                         title: "Error",
-                                        description: "Failed to report the accident. Please try again."
-                                    });
+                                        description: "Failed to report the accident. Please try again.",
+                                    })
                                 }
                             }}
                         >
                             Submit Report
                         </Button>
-                        {isSubmitted && <p className="text-green-500 mt-2 px-1">Report submitted successfully!</p>}
+                        {isSubmitted && (
+                            <p className="text-green-500 mt-2 px-1">Report submitted successfully!</p>
+                        )}
                     </CardFooter>
                 </form>
             </Form>

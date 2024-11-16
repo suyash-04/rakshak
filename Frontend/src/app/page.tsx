@@ -2,11 +2,13 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
+import { useRouter } from "next/navigation"; // For App Router
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AlertTriangle, Info } from 'lucide-react'
 import AccidentReportForm from './components/AccidentForm'
+
 
 const DynamicMap = dynamic(() => import('@/app/components/Map'), {
   ssr: false,
@@ -15,7 +17,7 @@ const DynamicMap = dynamic(() => import('@/app/components/Map'), {
 export default function Home() {
   const [showForm, setShowForm] = useState(false)
   const [coordinates, setCoordinates] = useState<[number, number]>([27.7172, 85.324])
-
+  const router = useRouter()
 
 
 
@@ -27,9 +29,11 @@ export default function Home() {
             <AlertTriangle className="h-6 w-6" />
             Rakshak
           </h1>
-          <Button variant="destructive" onClick={() => setShowForm(true)}>
-            Report an Accident
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button variant="destructive" onClick={() => setShowForm(true)}>
+              Report an Accident
+            </Button>
+          </div>
         </div>
       </header>
 
