@@ -15,20 +15,39 @@ const GetHeatmap: FC<GetHeatmapProps> = ({ accidentPoints, landslidePoints, floo
     const map = useMap();
 
     useEffect(() => {
-        const accidentLayer = L.heatLayer(accidentPoints, { radius: 10, blur: 5 });
-        const landslideLayer = L.heatLayer(landslidePoints, { radius: 10, blur: 5 });
-        const floodLayer = L.heatLayer(floodPoints, { radius: 10, blur: 5 });
+        // Assuming addressPoints is defined elsewhere in your code
 
-        map.addLayer(accidentLayer);
-        map.addLayer(landslideLayer);
-        map.addLayer(floodLayer);
-
+        const accidentheatLayer = L.heatLayer(accidentPoints, {
+            radius: 15,
+            blur: 20,
+            maxZoom: 17, gradient: {
+                '0': 'Red',
+                '1': 'Red'
+            },
+        })
+        const landslideheatLayer = L.heatLayer(landslidePoints, {
+            radius: 15,
+            blur: 20,
+            maxZoom: 17, gradient: {
+                '0': 'Yellow',
+                '1': 'Yellow'
+            },
+        })
+        const floodheatLayer = L.heatLayer(floodPoints, {
+            radius: 15,
+            blur: 20,
+            maxZoom: 17, gradient: {
+                '0': 'Navy',
+                '1': 'Navy'
+            },
+        })
+            ;
         return () => {
-            map.removeLayer(accidentLayer);
-            map.removeLayer(landslideLayer);
-            map.removeLayer(floodLayer);
+            accidentheatLayer.addTo(map);
+            floodheatLayer.addTo(map);
+            landslideheatLayer.addTo(map);
         };
-    }, [map, accidentPoints, landslidePoints, floodPoints]);
+    }, [map, accidentPoints, floodPoints, landslidePoints]);
 
     return null;
 };
