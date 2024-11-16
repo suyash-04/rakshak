@@ -27,7 +27,7 @@ export default function Home() {
             <AlertTriangle className="h-6 w-6" />
             Rakshak
           </h1>
-          <Button variant="secondary" onClick={() => setShowForm(true)}>
+          <Button variant="destructive" onClick={() => setShowForm(true)}>
             Report an Accident
           </Button>
         </div>
