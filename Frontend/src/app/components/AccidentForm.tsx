@@ -1,5 +1,5 @@
 "use client"
-
+import { sendMessage } from "../utils/twilio"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -33,10 +33,10 @@ interface AccidentReportFormProps {
 
 const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordinates }) => {
     const [isSubmitted, setIsSubmitted] = useState(false)
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-
             type: "accident",
         },
     })
@@ -58,8 +58,11 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
             if (!response.ok) {
                 throw new Error('Failed to submit report')
             }
-
             setIsSubmitted(true) // Set submission status
+
+            const messageResponse = await sendMessage(coordinates[0], coordinates[1])
+            console.log(messageResponse)
+
             setTimeout(onClose, 2000) // Close form after 2 seconds for feedback display
         } catch (error) {
             console.error('Error submitting form:', error)

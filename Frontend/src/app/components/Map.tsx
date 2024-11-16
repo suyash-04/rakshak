@@ -13,6 +13,7 @@ import { AlertCircle, MapPin, Search } from 'lucide-react'
 import 'leaflet.heat'
 import { getLocationFromCoordinates } from '../utils/coordinatesToLocation'
 import pLimit from 'p-limit';
+import { sendMessage } from '../utils/twilio'
 
 const icon = new L.Icon({
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -46,6 +47,7 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
     const [landslideaddressPoints, setlandslideAddressPoints] = useState<HeatLatLngTuple[]>([])
     const [floodaddressPoints, setfloodAddressPoints] = useState<HeatLatLngTuple[]>([])
     const [newsPoints, setNewsPoints] = useState<object[]>([])
+
 
     useEffect(() => {
         onCoordinateChange(coord);
@@ -94,7 +96,6 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                 try {
                     const response = await fetch('http://127.0.0.1:8000/api/hazards');
                     const data = await response.json();
-                    console.log(data)
                     const accidenttransformedData = data
                         .filter((item: any) => item.type === "accident") // Filter by type
                         .map((item: any) => [
@@ -118,7 +119,6 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                             90,
                         ]);
 
-                    console.log(accidenttransformedData)
                     setaccidentAddressPoints(accidenttransformedData);
                     setfloodAddressPoints(floodtransformedData);
                     setlandslideAddressPoints(landslidetransformedData)
@@ -137,28 +137,12 @@ const Map: React.FC<MapProps> = ({ onCoordinateChange }) => {
                     return distance <= 10500; // 10.5 km radius
                 });
 
-                // Limit concurrent requests to avoid rate limiting
-                const limit = pLimit(5); // Adjust concurrency as needed
-                const locationPromises = accidentpointsWithinCircle.map(([lat, lng]) =>
-                    limit(async () => {
-                        try {
-                            const location = await getLocationFromCoordinates(lat, lng);
-                            if (location && !('error' in location)) {
-                                return location;
-                            }
-                        } catch (error) {
-                            console.error(`Error fetching location for [${lat}, ${lng}]:`, error);
-                        }
-                        return null;
-                    })
-                );
-
-                const locations = await Promise.all(locationPromises);
-
-                // Filter out null values
-                const validLocations = locations.filter(location => location !== null);
-                setNewsPoints(validLocations);
-                console.log(validLocations);
+                // accidentpointsWithinCircle.forEach(async point => {
+                //     const location = await getLocationFromCoordinates(point[0], point[1]);
+                //     if (location && !('error' in location)) {
+                //         setNewsPoints(prevNewsPoints => [...prevNewsPoints, location]);
+                //     }
+                // });
             };
 
             fetchLocations();
