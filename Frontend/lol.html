@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Detection</title>
+</head>
+
+<body>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing the camera: ", err);
+            });
+
+        function captureAndDetectFire() {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/jpeg').split(',')[1];
+
+            axios({
+                method: "POST",
+                url: "https://detect.roboflow.com/fire-vc4nw/3",
+                params: {
+                    api_key: "t2Fw98AlpW5ldaQu55sj"
+                },
+                data: imageData,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            })
+                .then(function (response) {
+                    const predictions = response.data.predictions;
+                    const fireDetected = predictions.some(prediction => prediction.class === 'fire');
+                    if (fireDetected) {
+                        console.log("Fire is detected");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error:", error);
+                });
+        }
+
+        setInterval(captureAndDetectFire, 1000);
+    </script>
+</body>
+
+</html>
