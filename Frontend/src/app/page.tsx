@@ -98,7 +98,7 @@ export default function Home() {
           </h1>
           <div className="flex items-center gap-4">
             <Button variant="destructive" onClick={() => setShowForm(true)}>
-              Report an Accident
+              Report a hazard
             </Button>
           </div>
         </div>

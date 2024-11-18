@@ -76,8 +76,8 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
     return (
         <Card className="w-full max-w-2xl mx-auto">
             <CardHeader>
-                <CardTitle>Accident Report Form</CardTitle>
-                <CardDescription>Please fill out the details of the accident below.</CardDescription>
+                <CardTitle>Hazard Report Form</CardTitle>
+                <CardDescription>Please fill out the details of the hazard below.</CardDescription>
             </CardHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -99,7 +99,7 @@ const AccidentReportForm: React.FC<AccidentReportFormProps> = ({ onClose, coordi
                                             <SelectItem value="damagedroad">Damaged Road / Potholes</SelectItem>
                                             <SelectItem value="landslide">Landslide</SelectItem>
                                             <SelectItem value="flood">Flood</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            <SelectItem value="other">Fire</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
