@@ -1,9 +1,20 @@
 # Rakshak: Your Comprehensive Safety Companion
 
-**Rakshak** is an all-in-one safety application designed to provide **real-time updates** on accidents, floods, and other hazards. With its intuitive design, it offers:  
-- **Responsive dashboards** for police and ambulance services.  
-- **Interactive maps** with heatmaps highlighting various hazard-prone areas.  
-- **User-friendly reporting system** to enable individuals to report incidents seamlessly.
+**Rakshak** is an all-in-one safety application designed to provide **real-time updates** on accidents, floods, and other hazards.
+
+## ✨ Features
+
+*   **Real-time Hazard Updates:** Get instant notifications and information on ongoing accidents, floods, and other critical hazards.
+*   **Intuitive Dashboards:** Responsive and easy-to-use dashboards specifically tailored for police and ambulance services for efficient incident management.
+*   **Interactive Maps:** Visualize hazard-prone areas with interactive maps and heatmaps to understand risk distribution.
+*   **Seamless Incident Reporting:** A user-friendly system allowing individuals to easily report incidents and contribute to real-time data.
+
+## 💻 Technologies Used
+
+*   **Backend:** Python (with frameworks like Flask or Django - *please update with actual framework used*)
+*   **Frontend:** JavaScript (with frameworks/libraries like React, Vue, or Angular - *please update with actual technology used*)
+*   **Database:** (*Please add the database technology used, e.g., PostgreSQL, MongoDB, SQLite*)
+*   **Mapping:** (*Please add the mapping library/service used, e.g., Leaflet, Mapbox, Google Maps API*)
 
 ---
 
