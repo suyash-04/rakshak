@@ -1,4 +1,4 @@
-GEMINI_API = "AIzaSyBV_7pw611g6J19JzJCwWevKXGIfnVuEjg"
+GEMINI_API = "xxx"
 
 import requests
 from bs4 import BeautifulSoup
